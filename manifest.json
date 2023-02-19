@@ -1,9 +1,9 @@
 {
-	"id": "admonition-to-quarto",
-	"name": "Convert Between Admonition and Quarto",
+	"id": "obsidian-to-omnifocus",
+	"name": "Obsidian to OmniFocus",
 	"version": "1.0.4",
 	"minAppVersion": "0.12.0",
-	"description": "An Obsidian plugin to convert your admonition-style callouts to Quarto-style callouts and vice versa.",
+	"description": "An Obsidian plugin will extract tasks from the current note and create them in OmniFocus.",
 	"author": "Henry Gustafson",
 	"authorUrl": "https://lizard-heart.github.io",
 	"isDesktopOnly": false
