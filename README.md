@@ -1,6 +1,8 @@
 # Obsidian to OmniFocus
 This plugin will extract tasks from the current note open in Obsidian and create them in OmniFocus.
-<img src="demo-video.mov" width=70%>
+
+<img src="https://user-images.githubusercontent.com/62226606/224575880-a37e5855-7888-4a12-9098-f770ffb5ec87.mov" width=70%>
+
 
 ## Installation
 1. Download the latest release from the [releases page](https://github.com/lizard-heart/obsidian-to-omnifocus/releases/tag/1.0.4)
