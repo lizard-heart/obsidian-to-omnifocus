@@ -1,7 +1,7 @@
 {
 	"id": "tasks-to-omnifocus",
 	"name": "Send Tasks to OmniFocus",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"minAppVersion": "0.12.0",
 	"description": "An Obsidian plugin will extract tasks from the current note and create them in OmniFocus.",
 	"author": "Henry Gustafson",

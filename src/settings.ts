@@ -1,16 +1,16 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import ListModified from "./main";
 
-export interface ListModifiedSettings {
+export interface ListModifiedSettingsRenamed {
 	markComplete: boolean;
 }
 
-export const DEFAULT_SETTINGS: ListModifiedSettings = {
+export const DEFAULT_SETTINGS: ListModifiedSettingsRenamed = {
 	markComplete: true,
 
 };
 
-export class ListModifiedSettingTab extends PluginSettingTab {
+export class ListModifiedSettingTabRenamed extends PluginSettingTab {
 	plugin: ListModified;
 	tagString: string;
 

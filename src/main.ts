@@ -6,27 +6,59 @@ import {
 	Plugin,
 	TFile,
 	Vault,
+	Editor,
 } from "obsidian";
 
 import {
-	ListModifiedSettings,
+	ListModifiedSettingsRenamed,
 	DEFAULT_SETTINGS,
-	ListModifiedSettingTab,
+	ListModifiedSettingTabRenamed,
 } from "./settings";
 
 
-export default class ListModified extends Plugin {
-	settings: ListModifiedSettings;
+export default class ListModifiedRenamed extends Plugin {
+	settings: ListModifiedSettingsRenamed;
 
 	async onload() {
 		await this.loadSettings();
+		// this.addCommand({
+		// 	id: "extract-tasks",
+		// 	name: "Extract Tasks Into OmniFocus",
+		// 	callback: () => this.sendToOF(),
+		// });
+
 		this.addCommand({
-			id: "extract-tasks",
-			name: "Extract Tasks Into OmniFocus",
-			callback: () => this.sendToOF(),
+			id: 'extract-tasks',
+			name: 'Extract Tasks Into OmniFocus',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				const editorText = editor.getValue()
+				try {
+					let tasks = editorText.match(/- \[ \] .*/g);
+
+					for (let task of tasks) {
+						let taskName = task.replace("- [ ] ", "");
+						let taskNameEncoded = encodeURIComponent(taskName);
+						let noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
+						let vaultName = app.vault.getName();
+						let taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
+
+						window.open(
+							`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}`
+						);
+					}
+
+					if (this.settings.markComplete) {
+						let completedText = editorText.replace(/- \[ \]/g, "- [x]");
+						editor.setValue(completedText);
+					}
+
+				} catch (err) {
+
+				}
+			},
 		});
 
-		this.addSettingTab(new ListModifiedSettingTab(this.app, this));
+		this.addSettingTab(new ListModifiedSettingTabRenamed(this.app, this));
 	}
 
 	async saveSettings() {
@@ -35,39 +67,39 @@ export default class ListModified extends Plugin {
 
 	onunload() {}
 
-	// the first function that runs
-	async sendToOF() {
-		// const app = window.app as App;
-		const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-		if (view!=null) {
-			const editor = view.editor;
-			const editorText = editor.getValue();
+	// // the first function that runs
+	// async sendToOF() {
+	// 	// const app = window.app as App;
+	// 	const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+	// 	if (view!=null) {
+	// 		const editor = view.editor;
+	// 		const editorText = editor.getValue();
 
-			try {
-				let tasks = editorText.match(/- \[ \] .*/g);
+	// 		try {
+	// 			let tasks = editorText.match(/- \[ \] .*/g);
 
-				for (let task of tasks) {
-					let taskName = task.replace("- [ ] ", "");
-					let taskNameEncoded = encodeURIComponent(taskName);
-					let noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
-					let vaultName = app.vault.getName();
-					let taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file="+noteURL);
+	// 			for (let task of tasks) {
+	// 				let taskName = task.replace("- [ ] ", "");
+	// 				let taskNameEncoded = encodeURIComponent(taskName);
+	// 				let noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
+	// 				let vaultName = app.vault.getName();
+	// 				let taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file="+noteURL);
 					
-					window.open(
-						`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}`
-					);
-				}
+	// 				window.open(
+	// 					`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}`
+	// 				);
+	// 			}
 
-				if (this.settings.markComplete) {
-					let completedText = editorText.replace(/- \[ \]/g, "- [x]");
-					editor.setValue(completedText);
-				}
+	// 			if (this.settings.markComplete) {
+	// 				let completedText = editorText.replace(/- \[ \]/g, "- [x]");
+	// 				editor.setValue(completedText);
+	// 			}
 
-			} catch (err) {
+	// 		} catch (err) {
 
-			}
-		}
-	}
+	// 		}
+	// 	}
+	// }
 
 
 	private async loadSettings() {
