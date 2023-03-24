@@ -16,3 +16,10 @@ This plugin will extract tasks from the current note open in Obsidian and create
 3. Run the `Extract Tasks Into OmniFocus` command
 4. Asign any projects and tasks in the Omnifocus modal that appears
 5. The tasks should be marked as complete in Obsidian if that setting is enabled
+
+## Support
+In case you want to support development:
+<br>
+<a href="https://www.buymeacoffee.com/lizardheart">
+ <img alt="Buy me a Coffee" height="39px" src="https://raw.githubusercontent.com/lizard-heart/lizard-heart/main/buy-me-a-cofee.png" />
+</a>
