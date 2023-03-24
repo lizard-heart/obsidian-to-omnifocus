@@ -10,14 +10,14 @@ import {
 } from "obsidian";
 
 import {
-	ListModifiedSettingsRenamed,
+	TasksToOmnifocusSettings,
 	DEFAULT_SETTINGS,
-	ListModifiedSettingTabRenamed,
+	TasksToOmnifocusSettingTab,
 } from "./settings";
 
 
-export default class ListModifiedRenamed extends Plugin {
-	settings: ListModifiedSettingsRenamed;
+export default class TasksToOmnifocus extends Plugin {
+	settings: TasksToOmnifocusSettings;
 
 	async onload() {
 		await this.loadSettings();
@@ -58,7 +58,7 @@ export default class ListModifiedRenamed extends Plugin {
 			},
 		});
 
-		this.addSettingTab(new ListModifiedSettingTabRenamed(this.app, this));
+		this.addSettingTab(new TasksToOmnifocusSettingTab(this.app, this));
 	}
 
 	async saveSettings() {

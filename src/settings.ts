@@ -1,16 +1,16 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import ListModified from "./main";
 
-export interface ListModifiedSettingsRenamed {
+export interface TasksToOmnifocusSettings {
 	markComplete: boolean;
 }
 
-export const DEFAULT_SETTINGS: ListModifiedSettingsRenamed = {
+export const DEFAULT_SETTINGS: TasksToOmnifocusSettings = {
 	markComplete: true,
 
 };
 
-export class ListModifiedSettingTabRenamed extends PluginSettingTab {
+export class TasksToOmnifocusSettingTab extends PluginSettingTab {
 	plugin: ListModified;
 	tagString: string;
 
