@@ -80,7 +80,7 @@ export default class TasksToOmnifocus extends Plugin {
 
 					if (this.settings.markComplete) {
 						let completedText = editorText.replace(/- \[ \]/g, "- [x]");
-						editor.setValue(completedText);
+						editor.replaceSelection(completedText);
 					}
 
 				} catch (err) {
