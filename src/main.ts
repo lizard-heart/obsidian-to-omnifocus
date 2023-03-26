@@ -57,6 +57,37 @@ export default class TasksToOmnifocus extends Plugin {
 				}
 			},
 		});
+		
+		this.addCommand({
+			id: 'extract-tasks-selection',
+			name: 'Extract Tasks from selection Into OmniFocus',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				const editorText = editor.getSelection()
+				try {
+					let tasks = editorText.match(/- \[ \] .*/g);
+
+					for (let task of tasks) {
+						let taskName = task.replace("- [ ] ", "");
+						let taskNameEncoded = encodeURIComponent(taskName);
+						let noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
+						let vaultName = app.vault.getName();
+						let taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
+
+						window.open(
+							`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}`
+						);
+					}
+
+					if (this.settings.markComplete) {
+						let completedText = editorText.replace(/- \[ \]/g, "- [x]");
+						editor.replaceSelection(completedText);
+					}
+
+				} catch (err) {
+
+				}
+			},
+		});
 
 		this.addSettingTab(new TasksToOmnifocusSettingTab(this.app, this));
 	}
