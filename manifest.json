@@ -6,5 +6,6 @@
 	"description": "An Obsidian plugin will extract tasks from the current note and create them in OmniFocus.",
 	"author": "Henry Gustafson",
 	"authorUrl": "https://lizard-heart.github.io",
+	"fundingUrl": "https://buymeacoffee.com/lizardheart",
 	"isDesktopOnly": false
 }
