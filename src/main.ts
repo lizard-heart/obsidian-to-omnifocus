@@ -26,24 +26,28 @@ export default class TasksToOmnifocus extends Plugin {
 			id: 'extract-tasks',
 			name: 'Extract Tasks Into OmniFocus',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				const editorText = editor.getValue()
-				this.addToOmnifocus(editorText, editor, view);
+				this.addToOmnifocus(false, editor, view);
 			},
 		});
-		
+
 		this.addCommand({
 			id: 'extract-tasks-selection',
 			name: 'Extract Tasks from selection Into OmniFocus',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				const editorText = editor.getSelection();
-				this.addToOmnifocus(editorText, editor, view);
+				this.addToOmnifocus(true, editor, view);
 			},
 		});
 
 		this.addSettingTab(new TasksToOmnifocusSettingTab(this.app, this));
 	}
 
-	async addToOmnifocus(editorText: string, editor: Editor, view: MarkdownView) {
+	async addToOmnifocus(isSelection: bool, editor: Editor, view: MarkdownView) {
+		var editorText;
+		if (isSelection) {
+			editorText = editor.getSelection();
+		} else {
+			editorText = editor.getValue();
+		}
 		try {
 			let tasks = editorText.match(/- \[ \] .*/g);
 
@@ -61,11 +65,15 @@ export default class TasksToOmnifocus extends Plugin {
 
 			if (this.settings.markComplete) {
 				let completedText = editorText.replace(/- \[ \]/g, "- [x]");
-				editor.replaceSelection(completedText);
+				if (isSelection) {
+					editor.replaceSelection(completedText);
+				} else {
+					editor.setValue(completedText)
+				}
 			}
 
 		} catch (err) {
-
+			
 		}
 	}
 
@@ -73,7 +81,7 @@ export default class TasksToOmnifocus extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	onunload() {}
+	onunload() { }
 
 
 	private async loadSettings() {
