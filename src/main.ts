@@ -73,7 +73,7 @@ export default class TasksToOmnifocus extends Plugin {
 			}
 
 		} catch (err) {
-			// do you really want to hide any and all errors from the user?
+			
 		}
 	}
 
