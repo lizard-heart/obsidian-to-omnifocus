@@ -55,7 +55,7 @@ export default class TasksToOmnifocus extends Plugin {
 				let taskName = task.replace("- [ ] ", "");
 				let taskNameEncoded = encodeURIComponent(taskName);
 				let noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
-				let vaultName = app.vault.getName();
+				let vaultName = app.vault.getName().replace(/\s/g, "%20");
 				let taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
 
 				window.open(
