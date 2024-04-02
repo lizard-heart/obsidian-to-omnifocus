@@ -41,7 +41,7 @@ export default class TasksToOmnifocus extends Plugin {
 		this.addSettingTab(new TasksToOmnifocusSettingTab(this.app, this));
 	}
 
-	async addToOmnifocus(isSelection: bool, editor: Editor, view: MarkdownView) {
+	async addToOmnifocus(isSelection: boolean, editor: Editor, view: MarkdownView) {
 		var editorText;
 		if (isSelection) {
 			editorText = editor.getSelection();
