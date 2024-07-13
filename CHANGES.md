@@ -1,3 +1,7 @@
+## 1.2.0 (July 2024)
+
+- Strips out Markdown links from task name and provides URLs in task notes
+
 ## 1.1.0 (July 2024)
 
 - Fixes issue with vault names containing spaces (#4). Thanks to shabegom.

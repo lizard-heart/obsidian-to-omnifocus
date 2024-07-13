@@ -49,17 +49,34 @@ export default class TasksToOmnifocus extends Plugin {
 			for (const task of tasks) {
 				let taskName = task.replace(/[-*] \[ \] /, "");
 				// check if taskName has "//" followed by a date, and if so extract the date for later use and remove it from taskName
-				const dateMatch = taskName.match(/(\/\/\s*)(\d{4}-\d{2}-\d{2})/);
+				const dateMatch = taskName.match(/(\/\/\s*)(\d{4}-\d{2}-\d{2})\s?/);
 				let taskDate = "";
 				if (dateMatch) {
 					taskDate = dateMatch[2];
 					taskName = taskName.replace(dateMatch[0], "");
 				}
-				const taskNameEncoded = encodeURIComponent(taskName);
-				const noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
-				const vaultName = this.app.vault.getName().replace(/\s/g, "%20");
-				const taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
 
+				// Build a URL back to the original Obisdian page -- this will go in the task note
+				const fileURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
+				const vaultName = this.app.vault.getName().replace(/\s/g, "%20");
+				const obsidianURL = `obsidian://open?=${vaultName}&file=${fileURL}`;
+
+				// taskName may contain Markdown links -- if so, strip it out of taskName but save it to taskNote
+				let taskNote = obsidianURL;
+				const links = taskName.match(/\[([^\]]*)\]\(([^)]*)\)/g);
+				if (links) {
+					taskName = taskName.replace(/\[([^\]]*)\]\(([^)]*)\)/g, "$1");
+					taskNote += "\n\n";
+					for (const link of links) {
+						taskNote += link.replace(/\[([^\]]*)\]\(([^)]*)\)/g, "$1: $2") + "\n";
+					}
+				}
+				// Also check taskName for [[wikilinks]], but just remove these from taskName
+				taskName = taskName.replace(/\[\[([^\]]*)\]\]/g, "$1");
+
+				// Encode the taskName and task and send to OmniFocus
+				const taskNameEncoded = encodeURIComponent(taskName);
+				const taskNoteEncoded = encodeURIComponent(taskNote);
 				window.open(
 					`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}&due=${taskDate}`
 				);
