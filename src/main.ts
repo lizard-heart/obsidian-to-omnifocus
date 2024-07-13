@@ -1,11 +1,6 @@
-import { serialize } from "monkey-around";
 import {
 	MarkdownView,
-	CachedMetadata,
-	Notice,
 	Plugin,
-	TFile,
-	Vault,
 	Editor,
 } from "obsidian";
 
@@ -42,21 +37,21 @@ export default class TasksToOmnifocus extends Plugin {
 	}
 
 	async addToOmnifocus(isSelection: boolean, editor: Editor, view: MarkdownView) {
-		var editorText;
+		let editorText;
 		if (isSelection) {
 			editorText = editor.getSelection();
 		} else {
 			editorText = editor.getValue();
 		}
 		try {
-			let tasks = editorText.match(/- \[ \] .*/g);
+			const tasks = editorText.match(/- \[ \] .*/g);
 
-			for (let task of tasks) {
-				let taskName = task.replace("- [ ] ", "");
-				let taskNameEncoded = encodeURIComponent(taskName);
-				let noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
-				let vaultName = app.vault.getName().replace(/\s/g, "%20");
-				let taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
+			for (const task of tasks) {
+				const taskName = task.replace("- [ ] ", "");
+				const taskNameEncoded = encodeURIComponent(taskName);
+				const noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
+				const vaultName = app.vault.getName().replace(/\s/g, "%20");
+				const taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
 
 				window.open(
 					`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}`
@@ -64,7 +59,7 @@ export default class TasksToOmnifocus extends Plugin {
 			}
 
 			if (this.settings.markComplete) {
-				let completedText = editorText.replace(/- \[ \]/g, "- [x]");
+				const completedText = editorText.replace(/- \[ \]/g, "- [x]");
 				if (isSelection) {
 					editor.replaceSelection(completedText);
 				} else {
@@ -73,7 +68,7 @@ export default class TasksToOmnifocus extends Plugin {
 			}
 
 		} catch (err) {
-			
+			console.error('Error extracting tasks', err);
 		}
 	}
 
