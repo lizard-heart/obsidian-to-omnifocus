@@ -13,7 +13,7 @@ import {
 const TASK_REGEX = /[-*] \[ \] .*/g;
 const DATE_REGEX = /(\/\/\s*)(\d{4}-\d{2}-\d{2})\s?/;
 const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]*)\)/g;
-const WIKILINK_REGEX = /\[\[([^\]]*)\]\]/g;
+const WIKILINK_REGEX = /\[\[([^\]]+)\]\]/g;
 
 export default class TasksToOmnifocus extends Plugin {
 	settings: TasksToOmnifocusSettings;
@@ -59,15 +59,22 @@ export default class TasksToOmnifocus extends Plugin {
 			for (const task of tasks) {
 				// eslint-disable-next-line prefer-const
 				let { taskName, taskDate } = this.extractTaskNameAndDate(task);
-				let taskNote = this.buildObsidianURL(view);
+				const obsidianURL = this.buildObsidianURL(view);
+				let taskNote = obsidianURL;
 
-				const links = taskName.match(MARKDOWN_LINK_REGEX);
-				if (links) {
+				// Handle Markdown links
+				const markdownLinks = taskName.match(MARKDOWN_LINK_REGEX);
+				if (markdownLinks) {
 					taskName = taskName.replace(MARKDOWN_LINK_REGEX, "$1");
-					taskNote += "\n\n" + this.buildTaskNoteFromLinks(links);
+					taskNote += "\n\n" + this.buildTaskNoteFromLinks(markdownLinks);
 				}
 
-				taskName = taskName.replace(WIKILINK_REGEX, "$1");
+				// Handle WikiLinks
+				const wikiLinks = taskName.match(WIKILINK_REGEX);
+				if (wikiLinks) {
+					taskNote += "\n\n";
+					({ taskName, taskNote } = await this.handleWikiLinks(taskName, wikiLinks, taskNote));
+				}
 
 				const taskNameEncoded = encodeURIComponent(taskName);
 				const taskNoteEncoded = encodeURIComponent(taskNote);
@@ -89,6 +96,22 @@ export default class TasksToOmnifocus extends Plugin {
 		} catch (err) {
 			console.error('Error extracting tasks', err);
 		}
+	}
+
+	async handleWikiLinks(taskName: string, wikiLinks: string[], taskNote: string): Promise<{ taskName: string, taskNote: string }> {
+		for (const link of wikiLinks) {
+			const match = link.match(/\[\[([^\]|]+)(\|([^\]]+))?\]\]/);
+			if (match) {
+				const fileName = match[1];
+				const alias = match[3] || fileName;
+				const fileURL = encodeURIComponent(`${fileName}.md`);
+				const vaultName = encodeURIComponent(this.app.vault.getName());
+				const obsidianURL = `obsidian://open?vault=${vaultName}&file=${fileURL}`;
+				taskNote += `${alias}: ${obsidianURL}\n`;
+				taskName = taskName.replace(link, alias);
+			}
+		}
+		return { taskName, taskNote };
 	}
 
 	extractTaskNameAndDate(task: string): { taskName: string, taskDate: string } {
