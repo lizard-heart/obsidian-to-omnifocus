@@ -54,11 +54,10 @@ export default class TasksToOmnifocus extends Plugin {
 				if (dateMatch) {
 					taskDate = dateMatch[2];
 					taskName = taskName.replace(dateMatch[0], "");
-					console.log(`Setting taskDate to ${taskDate}`);
 				}
 				const taskNameEncoded = encodeURIComponent(taskName);
 				const noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
-				const vaultName = app.vault.getName().replace(/\s/g, "%20");
+				const vaultName = this.app.vault.getName().replace(/\s/g, "%20");
 				const taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
 
 				window.open(
