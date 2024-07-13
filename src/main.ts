@@ -44,10 +44,10 @@ export default class TasksToOmnifocus extends Plugin {
 			editorText = editor.getValue();
 		}
 		try {
-			const tasks = editorText.match(/- \[ \] .*/g);
+			const tasks = editorText.match(/[-*] \[ \] .*/g);
 
 			for (const task of tasks) {
-				const taskName = task.replace("- [ ] ", "");
+				const taskName = task.replace(/[-*] \[ \] /, "");
 				const taskNameEncoded = encodeURIComponent(taskName);
 				const noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
 				const vaultName = app.vault.getName().replace(/\s/g, "%20");
@@ -59,7 +59,7 @@ export default class TasksToOmnifocus extends Plugin {
 			}
 
 			if (this.settings.markComplete) {
-				const completedText = editorText.replace(/- \[ \]/g, "- [x]");
+				const completedText = editorText.replace(/([-*]) \[ \]/g, "$1 [x]");
 				if (isSelection) {
 					editor.replaceSelection(completedText);
 				} else {
