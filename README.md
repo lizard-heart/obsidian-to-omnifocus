@@ -17,6 +17,15 @@ This plugin will extract tasks from the current note open in Obsidian and create
 4. Asign any projects and tasks in the Omnifocus modal that appears
 5. The tasks should be marked as complete in Obsidian if that setting is enabled
 
+## Examples
+
+```markdown
+- [ ] This task will be sent to OmniFocus
+- [x] This task will not (already checked)
+* [ ] This task will be sent to OmniFocus
+- [ ] This task is due 1 Feb // 2025-02-01
+```
+
 ## Support
 In case you want to support development:
 <br>
