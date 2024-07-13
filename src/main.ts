@@ -10,6 +10,10 @@ import {
 	TasksToOmnifocusSettingTab,
 } from "./settings";
 
+const TASK_REGEX = /[-*] \[ \] .*/g;
+const DATE_REGEX = /(\/\/\s*)(\d{4}-\d{2}-\d{2})\s?/;
+const MARKDOWN_LINK_REGEX = /\[([^\]]*)\]\(([^)]*)\)/g;
+const WIKILINK_REGEX = /\[\[([^\]]*)\]\]/g;
 
 export default class TasksToOmnifocus extends Plugin {
 	settings: TasksToOmnifocusSettings;
@@ -37,46 +41,37 @@ export default class TasksToOmnifocus extends Plugin {
 	}
 
 	async addToOmnifocus(isSelection: boolean, editor: Editor, view: MarkdownView) {
-		let editorText;
+		let editorText: string;
 		if (isSelection) {
 			editorText = editor.getSelection();
 		} else {
 			editorText = editor.getValue();
 		}
+
 		try {
-			const tasks = editorText.match(/[-*] \[ \] .*/g);
+			const tasks = editorText.match(TASK_REGEX);
+
+			if (!tasks) {
+				console.warn('No tasks found in the selected text.');
+				return;
+			}
 
 			for (const task of tasks) {
-				let taskName = task.replace(/[-*] \[ \] /, "");
-				// check if taskName has "//" followed by a date, and if so extract the date for later use and remove it from taskName
-				const dateMatch = taskName.match(/(\/\/\s*)(\d{4}-\d{2}-\d{2})\s?/);
-				let taskDate = "";
-				if (dateMatch) {
-					taskDate = dateMatch[2];
-					taskName = taskName.replace(dateMatch[0], "");
-				}
+				// eslint-disable-next-line prefer-const
+				let { taskName, taskDate } = this.extractTaskNameAndDate(task);
+				let taskNote = this.buildObsidianURL(view);
 
-				// Build a URL back to the original Obisdian page -- this will go in the task note
-				const fileURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
-				const vaultName = this.app.vault.getName().replace(/\s/g, "%20");
-				const obsidianURL = `obsidian://open?=${vaultName}&file=${fileURL}`;
-
-				// taskName may contain Markdown links -- if so, strip it out of taskName but save it to taskNote
-				let taskNote = obsidianURL;
-				const links = taskName.match(/\[([^\]]*)\]\(([^)]*)\)/g);
+				const links = taskName.match(MARKDOWN_LINK_REGEX);
 				if (links) {
-					taskName = taskName.replace(/\[([^\]]*)\]\(([^)]*)\)/g, "$1");
-					taskNote += "\n\n";
-					for (const link of links) {
-						taskNote += link.replace(/\[([^\]]*)\]\(([^)]*)\)/g, "$1: $2") + "\n";
-					}
+					taskName = taskName.replace(MARKDOWN_LINK_REGEX, "$1");
+					taskNote += "\n\n" + this.buildTaskNoteFromLinks(links);
 				}
-				// Also check taskName for [[wikilinks]], but just remove these from taskName
-				taskName = taskName.replace(/\[\[([^\]]*)\]\]/g, "$1");
 
-				// Encode the taskName and task and send to OmniFocus
+				taskName = taskName.replace(WIKILINK_REGEX, "$1");
+
 				const taskNameEncoded = encodeURIComponent(taskName);
 				const taskNoteEncoded = encodeURIComponent(taskNote);
+
 				window.open(
 					`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}&due=${taskDate}`
 				);
@@ -87,7 +82,7 @@ export default class TasksToOmnifocus extends Plugin {
 				if (isSelection) {
 					editor.replaceSelection(completedText);
 				} else {
-					editor.setValue(completedText)
+					editor.setValue(completedText);
 				}
 			}
 
@@ -96,12 +91,32 @@ export default class TasksToOmnifocus extends Plugin {
 		}
 	}
 
+	extractTaskNameAndDate(task: string): { taskName: string, taskDate: string } {
+		let taskName = task.replace(/[-*] \[ \] /, "");
+		const dateMatch = taskName.match(DATE_REGEX);
+		let taskDate = "";
+		if (dateMatch) {
+			taskDate = dateMatch[2];
+			taskName = taskName.replace(dateMatch[0], "");
+		}
+		return { taskName, taskDate };
+	}
+
+	buildObsidianURL(view: MarkdownView): string {
+		const fileURL = encodeURIComponent(view.file.path);
+		const vaultName = encodeURIComponent(this.app.vault.getName());
+		return `obsidian://open?vault=${vaultName}&file=${fileURL}`;
+	}
+
+	buildTaskNoteFromLinks(links: string[]): string {
+		return links.map(link => link.replace(MARKDOWN_LINK_REGEX, "$1: $2")).join("\n");
+	}
+
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
 
 	onunload() { }
-
 
 	private async loadSettings() {
 		this.settings = Object.assign(
