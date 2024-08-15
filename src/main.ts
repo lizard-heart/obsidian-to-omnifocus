@@ -1,11 +1,6 @@
-import { serialize } from "monkey-around";
 import {
 	MarkdownView,
-	CachedMetadata,
-	Notice,
 	Plugin,
-	TFile,
-	Vault,
 	Editor,
 } from "obsidian";
 
@@ -41,30 +36,37 @@ export default class TasksToOmnifocus extends Plugin {
 		this.addSettingTab(new TasksToOmnifocusSettingTab(this.app, this));
 	}
 
-	async addToOmnifocus(isSelection: bool, editor: Editor, view: MarkdownView) {
-		var editorText;
+	async addToOmnifocus(isSelection: boolean, editor: Editor, view: MarkdownView) {
+		let editorText;
 		if (isSelection) {
 			editorText = editor.getSelection();
 		} else {
 			editorText = editor.getValue();
 		}
 		try {
-			let tasks = editorText.match(/- \[ \] .*/g);
+			const tasks = editorText.match(/[-*] \[ \] .*/g);
 
-			for (let task of tasks) {
-				let taskName = task.replace("- [ ] ", "");
-				let taskNameEncoded = encodeURIComponent(taskName);
-				let noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
-				let vaultName = app.vault.getName();
-				let taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
+			for (const task of tasks) {
+				let taskName = task.replace(/[-*] \[ \] /, "");
+				// check if taskName has "//" followed by a date, and if so extract the date for later use and remove it from taskName
+				const dateMatch = taskName.match(/(\/\/\s*)(\d{4}-\d{2}-\d{2})/);
+				let taskDate = "";
+				if (dateMatch) {
+					taskDate = dateMatch[2];
+					taskName = taskName.replace(dateMatch[0], "");
+				}
+				const taskNameEncoded = encodeURIComponent(taskName);
+				const noteURL = view.file.path.replace(/ /g, "%20").replace(/\//g, "%2F");
+				const vaultName = this.app.vault.getName().replace(/\s/g, "%20");
+				const taskNoteEncoded = encodeURIComponent("obsidian://open?=" + vaultName + "&file=" + noteURL);
 
 				window.open(
-					`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}`
+					`omnifocus:///add?name=${taskNameEncoded}&note=${taskNoteEncoded}&due=${taskDate}`
 				);
 			}
 
 			if (this.settings.markComplete) {
-				let completedText = editorText.replace(/- \[ \]/g, "- [x]");
+				const completedText = editorText.replace(/([-*]) \[ \]/g, "$1 [x]");
 				if (isSelection) {
 					editor.replaceSelection(completedText);
 				} else {
@@ -73,7 +75,7 @@ export default class TasksToOmnifocus extends Plugin {
 			}
 
 		} catch (err) {
-			
+			console.error('Error extracting tasks', err);
 		}
 	}
 
